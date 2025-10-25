@@ -1,0 +1,20 @@
+# Prometheus configuration for Quorum 7-node network exporters
+global:
+  scrape_interval: 5s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: quorum-geth
+    metrics_path: /debug/metrics/prometheus
+    static_configs:
+      - targets:
+          - 127.0.0.1:23000  # quorum-node1 metrics (9545)
+          - 127.0.0.1:23001  # quorum-node2 metrics
+          - 127.0.0.1:23002  # quorum-node3 metrics
+          - 127.0.0.1:23003  # quorum-node4 metrics
+          - 127.0.0.1:23004  # quorum-node5 metrics
+          - 127.0.0.1:23005  # quorum-node6 metrics
+          - 127.0.0.1:23006  # quorum-node7 metrics
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
