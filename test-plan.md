@@ -14,10 +14,10 @@ Establish a repeatable, end-to-end environment on Ubuntu 20.04+ that launches Go
 - Review docker-compose files for Clique, IBFT, and Raft configurations.
 
 ## Phase 3 – Network Deployment Workflows
-- **Clique**: `docker-compose -f docker-compose-clique.yml up -d`; validate 4 nodes (`quorum-node1`–`4`).
-- **IBFT**: `docker-compose down -v`, then `docker-compose -f docker-compose-ibft.yml up -d`; validate 4 nodes running IBFT.
-- **Raft**: `docker-compose down -v`, then `docker-compose -f docker-compose-raft.yml up -d`; validate 7 Raft nodes.
-- Inspect node logs (`docker logs -f quorum-nodeX`) to ensure consensus health.
+- **IBFT (istanbul)**: `COMPOSE_PROJECT_NAME=quorum-ibft docker compose -f quorum-test-network/docker-compose.yml up -d`. Spins up 7 validators (`validator1`–`validator7`) plus `rpcnode`, explorer, and monitoring stack on the default ports (HTTP `8545`, WS `8546`, Explorer `25000`, Prometheus `9090`, Grafana `3000`).
+- **QBFT**: `COMPOSE_PROJECT_NAME=quorum-qbft docker compose -f quorum-test-network/docker-compose-qbft.yml up -d`. Uses the same 7 validator keypairs but isolates them on subnet `172.16.240.0/24` with host ports `9545/9546` (RPC/WS), Explorer `25100`, Prometheus `9190`, Grafana `3300`.
+- **Raft**: `COMPOSE_PROJECT_NAME=quorum-raft docker compose -f quorum-test-network/docker-compose-raft.yml up -d`. Hosts 7 Raft validators on subnet `172.16.241.0/24` with host ports `10545/10546`, Explorer `25200`, Prometheus `9290`, Grafana `3600`.
+- The three docker-compose stacks can run simultaneously on a single host thanks to the separated ports and Docker networks. Use `docker compose -p <project> logs -f validatorX` to confirm block production per consensus.
 
 ## Phase 4 – Smart Contract Deployment
 - Author `VotingWithNFT.sol` that issues an ERC-721 vote certificate via OpenZeppelin when a ballot is cast, including a `hasVoted` guard to prevent duplicates.

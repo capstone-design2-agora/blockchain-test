@@ -14,7 +14,6 @@ x-quorum-def:
   expose:
     - 30303
     - 8545
-    - 9545
   healthcheck:
     test: ["CMD", "wget", "--spider", "--proxy", "off", "http://localhost:8545"]
     interval: 3s
@@ -39,7 +38,6 @@ services:
     ports:
       - 21001:8545/tcp
       - 30303
-      - 9545
     environment:
       - GOQUORUM_CONS_ALGO=${GOQUORUM_CONS_ALGO}
       - GOQUORUM_GENESIS_MODE=standard
@@ -55,7 +53,6 @@ services:
     ports:
       - 21002:8545/tcp
       - 30303
-      - 9545
     environment:
       - GOQUORUM_CONS_ALGO=${GOQUORUM_CONS_ALGO}
       - GOQUORUM_GENESIS_MODE=standard
@@ -71,7 +68,6 @@ services:
     ports:
       - 21003:8545/tcp
       - 30303
-      - 9545
     environment:
       - GOQUORUM_CONS_ALGO=${GOQUORUM_CONS_ALGO}
       - GOQUORUM_GENESIS_MODE=standard
@@ -87,7 +83,6 @@ services:
     ports:
       - 21004:8545/tcp
       - 30303
-      - 9545
     environment:
       - GOQUORUM_CONS_ALGO=${GOQUORUM_CONS_ALGO}
       - GOQUORUM_GENESIS_MODE=standard
@@ -98,14 +93,57 @@ services:
       quorum-dev-quickstart:
         ipv4_address: 172.16.239.14
 
+  validator5:
+    << : *quorum-def
+    ports:
+      - 21005:8545/tcp
+      - 30303
+    environment:
+      - GOQUORUM_CONS_ALGO=${GOQUORUM_CONS_ALGO}
+      - GOQUORUM_GENESIS_MODE=standard
+    volumes:
+      - ./config/nodes/validator5:/config/keys
+      - ./config/permissions:/permissions
+    networks:
+      quorum-dev-quickstart:
+        ipv4_address: 172.16.239.16
+
+  validator6:
+    << : *quorum-def
+    ports:
+      - 21006:8545/tcp
+      - 30303
+    environment:
+      - GOQUORUM_CONS_ALGO=${GOQUORUM_CONS_ALGO}
+      - GOQUORUM_GENESIS_MODE=standard
+    volumes:
+      - ./config/nodes/validator6:/config/keys
+      - ./config/permissions:/permissions
+    networks:
+      quorum-dev-quickstart:
+        ipv4_address: 172.16.239.17
+
+  validator7:
+    << : *quorum-def
+    ports:
+      - 21007:8545/tcp
+      - 30303
+    environment:
+      - GOQUORUM_CONS_ALGO=${GOQUORUM_CONS_ALGO}
+      - GOQUORUM_GENESIS_MODE=standard
+    volumes:
+      - ./config/nodes/validator7:/config/keys
+      - ./config/permissions:/permissions
+    networks:
+      quorum-dev-quickstart:
+        ipv4_address: 172.16.239.18
+
   rpcnode:
     << : *quorum-def
-    container_name: rpcnode
     ports:
       - 8545:8545/tcp
       - 8546:8546/tcp
       - 30303
-      - 9545
     environment:
       - GOQUORUM_CONS_ALGO=${GOQUORUM_CONS_ALGO}
       - GOQUORUM_GENESIS_MODE=standard
@@ -137,33 +175,6 @@ services:
 
 
 
-
-  prometheus:
-    image: "prom/prometheus:v2.46.0"
-    volumes:
-      - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-      - prometheus:/prometheus
-    command:
-      - --config.file=/etc/prometheus/prometheus.yml 
-    ports:
-      - 9090:9090/tcp
-    networks:
-      quorum-dev-quickstart:
-        ipv4_address: 172.16.239.32
-
-  grafana:
-    image: "grafana/grafana:10.1.0"
-    environment:
-      - GF_AUTH_ANONYMOUS_ENABLED=true
-      - GF_USERS_VIEWERS_CAN_EDIT=true
-    volumes:
-      - ./config/grafana/provisioning/:/etc/grafana/provisioning/
-      - grafana:/var/lib/grafana
-    ports:
-      - 3000:3000/tcp
-    networks:
-      quorum-dev-quickstart:
-        ipv4_address: 172.16.239.33
 
   loki:
     image: "grafana/loki:2.8.4"
@@ -200,6 +211,4 @@ networks:
 volumes:
   splunk:
   ethlogger:
-  prometheus:
-  grafana:
   blockscoutpostgres:

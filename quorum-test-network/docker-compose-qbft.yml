@@ -1,0 +1,219 @@
+---
+version: '3.6'
+
+x-quorum-def:
+  &quorum-def
+  restart: "on-failure"
+  build:
+    context: config/goquorum-qbft
+    args:
+      QUORUM_VERSION: ${QUORUM_VERSION:-latest}
+  expose:
+    - 30303
+    - 8545
+  healthcheck:
+    test: ["CMD", "wget", "--spider", "--proxy", "off", "http://localhost:8545"]
+    interval: 3s
+    timeout: 3s
+    retries: 10
+    start_period: 5s
+
+services:
+
+  validator1:
+    << : *quorum-def
+    ports:
+      - 22001:8545/tcp
+      - 30303
+    environment:
+      - GOQUORUM_CONS_ALGO=qbft
+      - GOQUORUM_GENESIS_MODE=standard
+    volumes:
+      - ./config/nodes/validator1:/config/keys
+      - ./config/permissions:/permissions
+    networks:
+      quorum-qbft:
+        ipv4_address: 172.16.240.11
+
+  validator2:
+    << : *quorum-def
+    ports:
+      - 22002:8545/tcp
+      - 30303
+    environment:
+      - GOQUORUM_CONS_ALGO=qbft
+      - GOQUORUM_GENESIS_MODE=standard
+    volumes:
+      - ./config/nodes/validator2:/config/keys
+      - ./config/permissions:/permissions
+    networks:
+      quorum-qbft:
+        ipv4_address: 172.16.240.12
+
+  validator3:
+    << : *quorum-def
+    ports:
+      - 22003:8545/tcp
+      - 30303
+    environment:
+      - GOQUORUM_CONS_ALGO=qbft
+      - GOQUORUM_GENESIS_MODE=standard
+    volumes:
+      - ./config/nodes/validator3:/config/keys
+      - ./config/permissions:/permissions
+    networks:
+      quorum-qbft:
+        ipv4_address: 172.16.240.13
+
+  validator4:
+    << : *quorum-def
+    ports:
+      - 22004:8545/tcp
+      - 30303
+    environment:
+      - GOQUORUM_CONS_ALGO=qbft
+      - GOQUORUM_GENESIS_MODE=standard
+    volumes:
+      - ./config/nodes/validator4:/config/keys
+      - ./config/permissions:/permissions
+    networks:
+      quorum-qbft:
+        ipv4_address: 172.16.240.14
+
+  validator5:
+    << : *quorum-def
+    ports:
+      - 22005:8545/tcp
+      - 30303
+    environment:
+      - GOQUORUM_CONS_ALGO=qbft
+      - GOQUORUM_GENESIS_MODE=standard
+    volumes:
+      - ./config/nodes/validator5:/config/keys
+      - ./config/permissions:/permissions
+    networks:
+      quorum-qbft:
+        ipv4_address: 172.16.240.16
+
+  validator6:
+    << : *quorum-def
+    ports:
+      - 22006:8545/tcp
+      - 30303
+    environment:
+      - GOQUORUM_CONS_ALGO=qbft
+      - GOQUORUM_GENESIS_MODE=standard
+    volumes:
+      - ./config/nodes/validator6:/config/keys
+      - ./config/permissions:/permissions
+    networks:
+      quorum-qbft:
+        ipv4_address: 172.16.240.17
+
+  validator7:
+    << : *quorum-def
+    ports:
+      - 22007:8545/tcp
+      - 30303
+    environment:
+      - GOQUORUM_CONS_ALGO=qbft
+      - GOQUORUM_GENESIS_MODE=standard
+    volumes:
+      - ./config/nodes/validator7:/config/keys
+      - ./config/permissions:/permissions
+    networks:
+      quorum-qbft:
+        ipv4_address: 172.16.240.18
+
+  rpcnode:
+    << : *quorum-def
+    ports:
+      - 9545:8545/tcp
+      - 9546:8546/tcp
+      - 30303
+    environment:
+      - GOQUORUM_CONS_ALGO=qbft
+      - GOQUORUM_GENESIS_MODE=standard
+    volumes:
+      - ./config/nodes/rpcnode:/config/keys
+      - ./config/permissions:/permissions
+    networks:
+      quorum-qbft:
+        ipv4_address: 172.16.240.15
+
+  explorer:
+    image: consensys/quorum-explorer:${QUORUM_EXPLORER_VERSION:-latest}
+    volumes:
+      - ./quorum-explorer/config.json:/app/config.json
+      - ./quorum-explorer/env:/app/.env.production
+    depends_on:
+      - rpcnode
+    ports:
+      - 25100:25000/tcp
+    networks:
+      quorum-qbft:
+        ipv4_address: 172.16.240.31
+
+  prometheus:
+    image: "prom/prometheus:v2.46.0"
+    volumes:
+      - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus:/prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml 
+    ports:
+      - 9190:9090/tcp
+    networks:
+      quorum-qbft:
+        ipv4_address: 172.16.240.32
+
+  grafana:
+    image: "grafana/grafana:10.1.0"
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_USERS_VIEWERS_CAN_EDIT=true
+    volumes:
+      - ./config/grafana/provisioning/:/etc/grafana/provisioning/
+      - grafana:/var/lib/grafana
+    ports:
+      - 3300:3000/tcp
+    networks:
+      quorum-qbft:
+        ipv4_address: 172.16.240.33
+
+  loki:
+    image: "grafana/loki:2.8.4"
+    volumes:
+      - ./loki/loki.yml:/etc/loki/local-config.yaml:ro
+    command: -config.file=/etc/loki/local-config.yaml
+    ports:
+      - 3400:3100/tcp
+    networks:
+      quorum-qbft:
+        ipv4_address: 172.16.240.34
+
+  promtail:
+    image: "grafana/promtail:2.8.4"
+    volumes:
+      - ./logs:/var/log
+      - ./promtail/promtail.yml:/etc/promtail/config.yml:ro
+    command: -config.file=/etc/promtail/config.yml
+    networks:
+      quorum-qbft:
+        ipv4_address: 172.16.240.35
+
+networks:
+  quorum-qbft:
+    name: quorum-qbft
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.16.240.0/24
+
+volumes:
+  splunk:
+  ethlogger:
+  prometheus:
+  grafana:
+  blockscoutpostgres:
