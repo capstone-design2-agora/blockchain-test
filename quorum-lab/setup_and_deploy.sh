@@ -34,15 +34,25 @@ if [[ -z "$CONSENSUS" ]]; then
 fi
 echo -e "${GREEN}✓ Consensus algorithm: ${CONSENSUS}${NC}"
 
+# Docker Compose 명령어 감지
+if docker compose version &>/dev/null; then
+    DOCKER_COMPOSE="docker compose"
+elif command -v docker-compose &>/dev/null; then
+    DOCKER_COMPOSE="docker-compose"
+else
+    echo -e "${RED}✗ Neither 'docker compose' nor 'docker-compose' found${NC}"
+    exit 1
+fi
+
 # 2. 네트워크 상태 확인
-echo -e "\n${YELLOW}[2/5] Checking network status...${NC}"
+echo -e "\n${YELLOW}[2/6] Checking network status...${NC}"
 cd "${NETWORK_DIR}"
 
-if docker compose ps | grep -q "validator1.*Up"; then
+if $DOCKER_COMPOSE ps 2>/dev/null | grep -q "validator1.*Up"; then
     echo -e "${GREEN}✓ Network is already running${NC}"
 else
     echo -e "${YELLOW}Starting network...${NC}"
-    docker compose up -d
+    $DOCKER_COMPOSE up -d
     
     # 네트워크가 완전히 시작될 때까지 대기
     echo -e "${YELLOW}Waiting for network to be ready...${NC}"
