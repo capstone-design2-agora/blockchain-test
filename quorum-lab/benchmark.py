@@ -48,8 +48,8 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--consensus",
-        default="clique",
-        help="Consensus label used when naming output files",
+        default=None,
+        help="Consensus label used when naming output files (auto-detected from deployment.json if not specified)",
     )
     parser.add_argument(
         "--tx-count",
@@ -966,10 +966,15 @@ def main() -> int:
     funder = accounts["funder"]
     created_accounts = accounts.get("created", [])
 
+    # Auto-detect consensus from deployment.json if not specified
+    consensus_label = args.consensus
+    if consensus_label is None:
+        consensus_label = network_info.get("consensus", "unknown")
+
     print("RPC:", rpc_url)
     print("Chain ID:", chain_id)
     print("Latest block:", latest_block)
-    print("Consensus label:", args.consensus)
+    print("Consensus label:", consensus_label)
     print("Funder:", funder)
     print("Total voters:", len(voters))
     if created_accounts:
@@ -1051,8 +1056,8 @@ def main() -> int:
                 f"target_rate {entry['tps']:.2f} tps"
             )
 
-    paths = build_output_paths(os.path.abspath(args.output_dir), args.consensus)
-    block_stats = fetch_block_stats(web3, consensus_hint=args.consensus)
+    paths = build_output_paths(os.path.abspath(args.output_dir), consensus_label)
+    block_stats = fetch_block_stats(web3, consensus_hint=consensus_label)
     overall_latency_stats, phase_latency_stats = collect_latency_breakdown(results, phase_plan)
 
     if not args.summary_only:
@@ -1082,7 +1087,7 @@ def main() -> int:
 
     summary_payload = {
         "timestamp": paths["timestamp"],
-        "consensus": args.consensus,
+        "consensus": consensus_label,
         "rpc_url": rpc_url,
         "chain_id": chain_id,
         "latest_block": block_stats.get("latest", latest_block),
