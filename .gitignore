@@ -139,11 +139,6 @@ quorum-lab/benchmarks/
 quorum-lab/reports/
 quorum-lab/monitoring/data/
 quorum-lab/workdir/
-quorum-lab/workdir/repos/quorum-examples/logs/
-quorum-lab/workdir/repos/quorum-examples/.pytest_cache/
-quorum-lab/workdir/repos/quorum-examples/.mypy_cache/
-quorum-lab/workdir/repos/quorum-examples/.venv/
-quorum-lab/workdir/repos/quorum-examples/.tox/
 quorum-besu-network/quorum-explorer/.next/
 quorum-besu-network/quorum-explorer/node_modules/
 quorum-besu-network/quorum-explorer/env

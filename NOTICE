@@ -1,0 +1,61 @@
+NOTICE
+
+This project contains code derived from the following projects:
+
+================================================================================
+Quorum Dev Quickstart
+================================================================================
+
+Copyright (c) ConsenSys Software Inc.
+Licensed under the Apache License, Version 2.0
+
+Original source: https://github.com/ConsenSys/quorum-dev-quickstart
+
+The following directories contain code from Quorum Dev Quickstart:
+- quorum-test-network/
+- quorum-besu-network/
+
+Modifications made:
+- Removed individual consensus-specific docker-compose files
+- Modified for single docker-compose.yml with .env configuration
+- Customized for performance benchmarking experiments
+
+================================================================================
+OpenZeppelin Contracts
+================================================================================
+
+Copyright (c) OpenZeppelin
+
+Licensed under the MIT License
+
+Original source: https://github.com/OpenZeppelin/openzeppelin-contracts
+
+Used in:
+- quorum-lab/contracts/VotingWithNFT.sol (ERC-721 implementation)
+
+================================================================================
+
+Our Original Contributions
+================================================================================
+
+The following components are original work created for this research project:
+
+Smart Contracts & Deployment:
+- quorum-lab/contracts/VotingWithNFT.sol
+- quorum-lab/deploy_contract.js
+- quorum-lab/setup_and_deploy.sh
+
+Benchmarking System:
+- quorum-lab/benchmark.py
+- quorum-lab/run_raft_benchmarks.sh
+- quorum-lab/run_qbft_benchmarks.sh
+- quorum-lab/check_nft_receipt.py
+- quorum-lab/check_csv_results.py
+
+Documentation & Results:
+- README.md (this file)
+- test_result/ (experimental results)
+- BENCHMARK_ANALYSIS_REPORT.md
+
+These original contributions are licensed under the MIT License.
+See LICENSE file for details.
