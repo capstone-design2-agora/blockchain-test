@@ -146,6 +146,36 @@ pip install web3 eth-account python-dotenv
 
 벤치마크 결과는 `test_result/[consensus]/[tps]/` 디렉토리에 저장됩니다.
 
+### ⚠️ 합의 알고리즘 변경 시 주의사항
+
+**IBFT ↔ QBFT ↔ Raft 간 변경 시 블록체인 데이터 완전 초기화 필수!**
+
+각 합의 알고리즘은 서로 다른 genesis 파일(extraData 포함)을 사용합니다. 알고리즘을 변경할 때:
+
+```bash
+cd quorum-test-network
+
+# 1. 네트워크 중지 및 볼륨 삭제 (블록체인 데이터 완전 초기화)
+docker-compose down -v
+
+# 2. .env에서 합의 알고리즘 변경
+sed -i 's/GOQUORUM_CONS_ALGO=.*/GOQUORUM_CONS_ALGO=raft/' .env
+
+# 3. 네트워크 재시작 (자동으로 새 genesis 적용)
+docker-compose up -d
+
+# 4. 스마트 컨트랙트 재배포
+cd ../quorum-lab
+node deploy_contract.js
+```
+
+**작동 원리**:
+- 각 노드의 entrypoint가 `${GOQUORUM_CONS_ALGO}-standard-genesis.json` 파일을 자동 선택
+- `geth init`으로 올바른 extraData를 가진 genesis 블록 생성
+- 볼륨 삭제(`-v`)로 기존 블록체인 데이터 완전 제거
+
+**중요**: `docker-compose restart`나 `down/up`(볼륨 유지)는 genesis를 재적용하지 않으므로 `-v` 옵션이 필수입니다.
+
 #### 5. 결과 분석
 
 실험 결과는 `test_result/BENCHMARK_ANALYSIS_REPORT.md`에서 확인할 수 있습니다.

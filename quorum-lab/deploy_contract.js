@@ -83,6 +83,7 @@ async function main() {
   const contractName = process.env.CONTRACT_NAME || 'Voting Receipt';
   const contractSymbol = process.env.CONTRACT_SYMBOL || 'VOTE';
   const proposalsEnv = process.env.PROPOSALS || 'Approve,Reject';
+  const consensus = process.env.GOQUORUM_CONS_ALGO || 'unknown';
   const proposals = proposalsEnv
     .split(',')
     .map((value) => value.trim())
@@ -170,7 +171,8 @@ async function main() {
       chainId,
       blockNumber,
       transactionHash: receipt.transactionHash,
-      gasUsed: receipt ? receipt.gasUsed : null
+      gasUsed: receipt ? receipt.gasUsed : null,
+      consensus
     },
     deployer,
     timestamp: new Date().toISOString()

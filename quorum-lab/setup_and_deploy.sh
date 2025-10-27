@@ -34,6 +34,18 @@ if [[ -z "$CONSENSUS" ]]; then
 fi
 echo -e "${GREEN}✓ Consensus algorithm: ${CONSENSUS}${NC}"
 
+# 합의 알고리즘 변경 경고
+if [[ -f "${ARTIFACTS_DIR}/deployment.json" ]]; then
+    LAST_CONSENSUS=$(jq -r '.network.consensus // empty' "${ARTIFACTS_DIR}/deployment.json" 2>/dev/null || echo "")
+    if [[ -n "$LAST_CONSENSUS" ]] && [[ "$LAST_CONSENSUS" != "$CONSENSUS" ]]; then
+        echo -e "${RED}⚠ WARNING: Consensus algorithm changed from ${LAST_CONSENSUS} to ${CONSENSUS}${NC}"
+        echo -e "${YELLOW}You must reset the blockchain data:${NC}"
+        echo -e "${YELLOW}  cd quorum-test-network && docker-compose down -v && docker-compose up -d${NC}"
+        echo -e "${YELLOW}Press Ctrl+C to abort, or wait 5 seconds to continue...${NC}"
+        sleep 5
+    fi
+fi
+
 # Docker Compose 명령어 감지
 if docker compose version &>/dev/null; then
     DOCKER_COMPOSE="docker compose"
@@ -132,7 +144,7 @@ fi
 # 6. 스마트 컨트랙트 배포
 if [ "$SHOULD_DEPLOY" = true ]; then
     echo -e "\n${YELLOW}[6/6] Deploying smart contract...${NC}"
-    node deploy_contract.js
+    GOQUORUM_CONS_ALGO="${CONSENSUS}" node deploy_contract.js
     
     if [[ -f "${ARTIFACTS_DIR}/deployment.json" ]]; then
         CONTRACT_ADDRESS=$(node -p "require('${ARTIFACTS_DIR}/deployment.json').contract.address")
