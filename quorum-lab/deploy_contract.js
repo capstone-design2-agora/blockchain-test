@@ -45,7 +45,7 @@ function compileContract() {
     },
     settings: {
       optimizer: { enabled: true, runs: 200 },
-      evmVersion: 'paris',
+      evmVersion: 'london',
       outputSelection: OUTPUT_SELECTION
     }
   };
