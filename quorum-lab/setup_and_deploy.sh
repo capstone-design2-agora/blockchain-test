@@ -36,7 +36,7 @@ echo -e "${GREEN}✓ Consensus algorithm: ${CONSENSUS}${NC}"
 
 # 합의 알고리즘 변경 경고
 if [[ -f "${ARTIFACTS_DIR}/deployment.json" ]]; then
-    LAST_CONSENSUS=$(jq -r '.network.consensus // empty' "${ARTIFACTS_DIR}/deployment.json" 2>/dev/null || echo "")
+    LAST_CONSENSUS=$(node -p "try { require('${ARTIFACTS_DIR}/deployment.json').network.consensus || '' } catch(e) { '' }" 2>/dev/null || echo "")
     if [[ -n "$LAST_CONSENSUS" ]] && [[ "$LAST_CONSENSUS" != "$CONSENSUS" ]]; then
         echo -e "${RED}⚠ WARNING: Consensus algorithm changed from ${LAST_CONSENSUS} to ${CONSENSUS}${NC}"
         echo -e "${YELLOW}You must reset the blockchain data:${NC}"
