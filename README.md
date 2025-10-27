@@ -109,7 +109,7 @@ docker compose ps
 cd quorum-lab
 
 # Node.js 의존성 설치 (최초 1회)
-npm install solc@0.8.20 web3@1.10.2 @openzeppelin/contracts@4.9.6
+npm install solc@0.8.20 web3@1.10.2 @openzeppelin/contracts@5.0.0
 
 # 컨트랙트 배포
 node deploy_contract.js

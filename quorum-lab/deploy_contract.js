@@ -150,8 +150,8 @@ async function main() {
 
   const contract = new web3.eth.Contract(abi, contractAddress);
 
-  const artifactsDir = path.resolve(PROJECT_ROOT, '../../../artifacts');
-  const logsDir = path.resolve(PROJECT_ROOT, '../../../logs');
+  const artifactsDir = path.resolve(PROJECT_ROOT, 'artifacts');
+  const logsDir = path.resolve(PROJECT_ROOT, 'logs');
   ensureDir(artifactsDir);
   ensureDir(logsDir);
 
