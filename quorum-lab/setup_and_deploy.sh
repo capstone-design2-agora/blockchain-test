@@ -70,7 +70,7 @@ cd "${SCRIPT_DIR}"
 
 if [[ ! -d "node_modules" ]]; then
     echo -e "${YELLOW}Installing Node.js dependencies...${NC}"
-    npm install solc@0.8.10 web3@1.10.2 @openzeppelin/contracts@4.9.6
+    npm install solc@0.8.20 web3@1.10.2 @openzeppelin/contracts@4.9.6
 else
     echo -e "${GREEN}✓ Node.js dependencies already installed${NC}"
 fi
