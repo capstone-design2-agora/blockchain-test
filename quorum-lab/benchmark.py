@@ -24,13 +24,13 @@ except ImportError:  # fallback for older web3 releases
     from web3.middleware import geth_poa_middleware as _POA_MIDDLEWARE
 
 DEFAULT_ARTIFACT_PATH = os.path.join(
-    os.path.dirname(__file__), "..", "..", "..", "artifacts", "deployment.json"
+    os.path.dirname(__file__), "artifacts", "deployment.json"
 )
 DEFAULT_BENCHMARK_DIR = os.path.join(
-    os.path.dirname(__file__), "..", "..", "..", "benchmarks"
+    os.path.dirname(__file__), "benchmarks"
 )
 DEFAULT_REPORT_DIR = os.path.join(
-    os.path.dirname(__file__), "..", "..", "..", "..", "test_result"
+    os.path.dirname(__file__), "..", "test_result"
 )
 
 
