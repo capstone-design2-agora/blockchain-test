@@ -1,0 +1,61 @@
+MIT License
+
+Copyright (c) 2024 Capstone Design 2 - Agora Team
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+## Third-Party Software
+
+This project is based on and includes components from:
+
+### Quorum Dev Quickstart
+- Copyright (c) ConsenSys Software Inc.
+- License: Apache-2.0
+- Repository: https://github.com/ConsenSys/quorum-dev-quickstart
+- Used components: quorum-test-network/ and quorum-besu-network/ directories
+
+The Apache License 2.0 is compatible with the MIT License, allowing us to:
+- Use the code
+- Modify the code
+- Distribute the code
+- Use it for commercial purposes
+
+Under the conditions that we:
+- Include the original copyright notice
+- Include the Apache license text
+- State changes made to the original code
+
+### OpenZeppelin Contracts
+- Copyright (c) OpenZeppelin
+- License: MIT
+- Repository: https://github.com/OpenZeppelin/openzeppelin-contracts
+- Used in: Smart contract development (VotingWithNFT.sol)
+
+---
+
+## Attribution
+
+This research project builds upon the Quorum Dev Quickstart by ConsenSys,
+extending it with custom smart contracts and performance benchmarking tools
+for comparing consensus algorithms (IBFT, QBFT, Raft).
+
+Original work by ConsenSys Software Inc. is licensed under Apache-2.0.
+Our modifications and additions are licensed under MIT.
