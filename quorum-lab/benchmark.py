@@ -503,9 +503,10 @@ def launch_receipt_worker(
                 proposal_id: Optional[int] = None
 
                 try:
-                    events = contract.events.VoteCast().process_receipt(receipt)
-                    if events:
-                        event_args = events[0]["args"]
+                    # VoteCast 이벤트만 필터링하여 경고 방지
+                    vote_cast_logs = contract.events.VoteCast().process_receipt(receipt, errors='ignore')
+                    if vote_cast_logs:
+                        event_args = vote_cast_logs[0]["args"]
                         token_id = int(event_args.get("tokenId"))
                         proposal_id = int(event_args.get("proposalId"))
                 except Exception:  # noqa: BLE001 - decode best effort
