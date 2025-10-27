@@ -19,13 +19,19 @@ echo -e "${GREEN}  Quorum Network Setup & Deployment${NC}"
 echo -e "${GREEN}========================================${NC}"
 
 # 1. 합의 알고리즘 확인
-echo -e "\n${YELLOW}[1/5] Checking consensus algorithm...${NC}"
+echo -e "\n${YELLOW}[1/6] Checking consensus algorithm...${NC}"
 if [[ ! -f "${NETWORK_DIR}/.env" ]]; then
-    echo -e "${YELLOW}No .env file found. Creating with CONSENSUS=raft${NC}"
-    echo "CONSENSUS=raft" > "${NETWORK_DIR}/.env"
+    echo -e "${RED}✗ .env file not found in quorum-test-network/${NC}"
+    echo -e "${YELLOW}Please copy .env.example or create .env file with GOQUORUM_CONS_ALGO${NC}"
+    echo -e "${YELLOW}Example: GOQUORUM_CONS_ALGO=raft${NC}"
+    exit 1
 fi
 
-CONSENSUS=$(grep CONSENSUS "${NETWORK_DIR}/.env" | cut -d= -f2)
+CONSENSUS=$(grep "^GOQUORUM_CONS_ALGO=" "${NETWORK_DIR}/.env" | cut -d= -f2)
+if [[ -z "$CONSENSUS" ]]; then
+    echo -e "${RED}✗ GOQUORUM_CONS_ALGO not set in .env${NC}"
+    exit 1
+fi
 echo -e "${GREEN}✓ Consensus algorithm: ${CONSENSUS}${NC}"
 
 # 2. 네트워크 상태 확인

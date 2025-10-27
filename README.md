@@ -91,8 +91,12 @@ cd quorum-lab
 ```bash
 cd quorum-test-network
 
-# 합의 알고리즘 선택 (raft, ibft, qbft 중 하나)
-echo "CONSENSUS=raft" > .env
+# .env.example을 복사하여 .env 생성
+cp .env.example .env
+
+# 합의 알고리즘 선택 (raft, qbft, istanbul 중 하나)
+# .env 파일에서 GOQUORUM_CONS_ALGO 값을 변경
+# 예: GOQUORUM_CONS_ALGO=raft
 
 # 네트워크 시작
 docker compose up -d
@@ -101,7 +105,9 @@ docker compose up -d
 docker compose ps
 ```
 
-**참고**: 이 프로젝트는 `.env` 파일로 합의 알고리즘을 선택하는 단일 `docker-compose.yml`을 사용합니다. 실험은 이 방식으로 진행되었습니다.
+**참고**: 
+- `.env.example` 파일에는 기본 설정(qbft)이 포함되어 있습니다
+- `GOQUORUM_CONS_ALGO` 값은 소문자로 입력: `raft`, `qbft`, `istanbul`
 
 #### 3. 스마트 컨트랙트 배포
 

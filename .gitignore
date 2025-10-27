@@ -108,8 +108,10 @@ ENV/
 # Environment & secrets
 .env
 .env.*
+!.env.example
 *.env
 *.env.*
+!*.env.example
 .envrc
 .envrc.*
 .secrets
