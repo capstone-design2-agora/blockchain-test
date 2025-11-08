@@ -14,7 +14,7 @@ PHASE_COUNT=1000
 BASE_CMD=(
   python3 "${SCRIPT_DIR}/benchmark.py"
   --poa
-  --rpc-url http://localhost:8545
+  --rpc-url http://localhost:10545
   --consensus qbft
   --phase-labels alwaysburst
   --receipt-workers 20

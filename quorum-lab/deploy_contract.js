@@ -79,15 +79,47 @@ function ensureDir(dirPath) {
 }
 
 async function main() {
-  const rpcUrl = process.env.NODE_URL || 'http://localhost:8545';
+  const rpcUrl = process.env.NODE_URL || 'http://localhost:10545';
   const contractName = process.env.CONTRACT_NAME || 'Voting Receipt';
   const contractSymbol = process.env.CONTRACT_SYMBOL || 'VOTE';
-  const proposalsEnv = process.env.PROPOSALS || 'Approve,Reject';
+  const proposalsEnv = process.env.PROPOSALS || 'Alice,Bob,Charlie';
   const consensus = process.env.GOQUORUM_CONS_ALGO || 'unknown';
   const proposals = proposalsEnv
     .split(',')
     .map((value) => value.trim())
     .filter(Boolean);
+
+  const ballotId = process.env.BALLOT_ID || 'citizen-2025';
+  const ballotTitle = process.env.BALLOT_TITLE || '제 25대 대통령 선거';
+  const ballotDescription =
+    process.env.BALLOT_DESCRIPTION ||
+    '대한민국 제 25대 대통령을 선출하는 공식 선거입니다.';
+
+  // Besu uses nanosecond timestamps
+  const nowNanoseconds = BigInt(Date.now()) * BigInt(1_000_000);
+  const oneHourNs = BigInt(3_600_000_000_000);
+  const sevenDaysNs = BigInt(604_800_000_000_000);
+  const threeHoursNs = BigInt(10_800_000_000_000);
+
+  const parseTimestamp = (key, fallback) => {
+    const raw = process.env[key];
+    if (!raw) {
+      return fallback;
+    }
+    const value = BigInt(raw);
+    if (value < 0) {
+      throw new Error(`Environment variable ${key} must be a positive integer (nanoseconds). Received: ${raw}`);
+    }
+    return value;
+  };
+  const ballotOpensAt = parseTimestamp('BALLOT_OPENS_AT', nowNanoseconds);
+  const ballotClosesAt = parseTimestamp('BALLOT_CLOSES_AT', ballotOpensAt + oneHourNs);
+  const ballotAnnouncesAt = parseTimestamp('BALLOT_ANNOUNCES_AT', ballotClosesAt + BigInt(180_000_000_000));
+  const expectedVotersRaw = process.env.BALLOT_EXPECTED_VOTERS ?? process.env.EXPECTED_VOTERS ?? process.env.REACT_APP_EXPECTED_VOTERS;
+  const expectedVoters =
+    expectedVotersRaw && Number.parseInt(expectedVotersRaw, 10) > 0
+      ? Number.parseInt(expectedVotersRaw, 10)
+      : 1000;
 
   if (proposals.length === 0) {
     throw new Error('At least one proposal title must be provided via PROPOSALS');
@@ -119,7 +151,18 @@ async function main() {
   const contractInstance = new web3.eth.Contract(abi);
   const deployment = contractInstance.deploy({
     data: '0x' + bytecode,
-    arguments: [contractName, contractSymbol, proposals]
+    arguments: [
+      contractName,
+      contractSymbol,
+      proposals,
+      ballotId,
+      ballotTitle,
+      ballotDescription,
+      ballotOpensAt.toString(),
+      ballotClosesAt.toString(),
+      ballotAnnouncesAt.toString(),
+      expectedVoters
+    ]
   });
 
   console.log('> Estimating gas...');
@@ -164,7 +207,16 @@ async function main() {
       address: contract.options.address,
       abi,
       proposals,
-      hasVotingReceipt: true
+      hasVotingReceipt: true,
+      ballot: {
+        id: ballotId,
+        title: ballotTitle,
+        description: ballotDescription,
+        opensAt: ballotOpensAt.toString(),
+        closesAt: ballotClosesAt.toString(),
+        announcesAt: ballotAnnouncesAt.toString(),
+        expectedVoters
+      }
     },
     network: {
       rpcUrl,

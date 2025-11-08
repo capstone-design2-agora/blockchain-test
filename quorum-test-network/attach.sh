@@ -8,5 +8,5 @@ if [ -z `docker-compose -f docker-compose.yml ps -q ${MEMBER_NODE} 2>/dev/null` 
   exit 1
 fi
 
-# can also do geth attach http://localhost:8545
+# can also do geth attach http://localhost:10545
 docker-compose exec ${MEMBER_NODE} /bin/sh -c "geth attach /data/geth.ipc"

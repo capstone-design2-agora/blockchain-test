@@ -928,7 +928,7 @@ def main() -> int:
     if not abi or not address:
         raise KeyError("Artifact must include contract.abi and contract.address")
 
-    rpc_url = args.rpc_url or network_info.get("rpcUrl") or "http://localhost:8545"
+    rpc_url = args.rpc_url or network_info.get("rpcUrl") or "http://localhost:10545"
 
     web3 = Web3(Web3.HTTPProvider(rpc_url))
     inject_poa_if_needed(web3, args.poa)
