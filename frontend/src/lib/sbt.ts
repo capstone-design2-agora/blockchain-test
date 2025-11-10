@@ -194,11 +194,11 @@ export async function voteWithSBT(
 }
 
 /**
- * Get reward NFTs owned by address
+ * Get reward NFTs owned by address with metadata
  */
 export async function getRewardNFTs(
     address: string
-): Promise<Array<{ tokenId: string; ballotId: string; proposalId: string }>> {
+): Promise<Array<{ tokenId: string; ballotId: string; proposalId: string; imageUrl: string; metadata: any }>> {
     try {
         const contract = getRewardNFTContract();
         const tokenIds = await contract.methods.tokensOfOwner(address).call();
@@ -212,10 +212,36 @@ export async function getRewardNFTs(
                 const ballotId = await contract.methods.getBallotId(tokenId).call();
                 const voteRecord = await contract.methods.getVoteRecord(tokenId).call();
 
-                return {
+                // Get tokenURI (base URL without tokenId)
+                let imageUrl = "";
+                let metadata = null;
+
+                try {
+                    const tokenURI = await contract.methods.tokenURI(tokenId).call();
+
+                    // tokenURI returns base_url/tokenId format (e.g., ipfs://QmXyz.../0)
+                    // We need to remove the /tokenId part and use the base image
+                    let uri = String(tokenURI);
+
+                    // Remove the trailing /tokenId (e.g., /0, /1, /2)
+                    const lastSlashIndex = uri.lastIndexOf('/');
+                    if (lastSlashIndex !== -1 && /^\d+$/.test(uri.substring(lastSlashIndex + 1))) {
+                        uri = uri.substring(0, lastSlashIndex);
+                    }
+
+                    // Convert ipfs:// to https gateway
+                    imageUrl = uri.replace('ipfs://', 'https://gateway.pinata.cloud/ipfs/');
+
+                    console.log(`Token ${tokenId} image URL:`, imageUrl);
+                } catch (uriError) {
+                    console.warn(`Failed to get tokenURI for token ${tokenId}:`, uriError);
+                    imageUrl = "";
+                } return {
                     tokenId: tokenId,
                     ballotId: String(ballotId),
                     proposalId: (voteRecord as any).proposalId.toString(),
+                    imageUrl: imageUrl,
+                    metadata: metadata,
                 };
             })
         );

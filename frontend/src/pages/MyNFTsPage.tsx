@@ -18,6 +18,7 @@ export default function MyNFTsPage() {
     const [nfts, setNfts] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [walletAddress, setWalletAddress] = useState<string | null>(null);
+    const [selectedNFT, setSelectedNFT] = useState<any | null>(null);
 
     useEffect(() => {
         const loadNFTs = async () => {
@@ -69,19 +70,55 @@ export default function MyNFTsPage() {
     }, [navigate]);
 
     const handleDisconnect = async () => {
-        try {
-            // MetaMask는 프로그래매틱하게 연결 해제할 수 없으므로
-            // Auth 페이지로 이동하고 사용자에게 안내
-            if (window.confirm("지갑 연결을 해제하시겠습니까?\n\nMetaMask에서 직접 연결을 해제하려면:\n1. MetaMask 확장 프로그램 클릭\n2. 연결된 사이트 관리\n3. 이 사이트 연결 해제")) {
-                // 세션 스토리지 정리
-                sessionStorage.clear();
-                localStorage.removeItem("walletAddress");
+        console.log("🔌 연결 해제 시작...");
 
-                // Auth 페이지로 이동
-                navigate("/auth");
+        try {
+            // 최신 MetaMask에서 지원하는 wallet_revokePermissions 시도
+            if ((window as any).ethereum) {
+                console.log("📡 MetaMask 감지됨, wallet_revokePermissions 시도...");
+
+                try {
+                    const result = await (window as any).ethereum.request({
+                        method: 'wallet_revokePermissions',
+                        params: [{ eth_accounts: {} }]
+                    });
+                    console.log("✓ 지갑 연결 권한이 성공적으로 취소되었습니다.", result);
+                } catch (revokeError: any) {
+                    // wallet_revokePermissions를 지원하지 않는 경우
+                    console.warn("⚠️ wallet_revokePermissions 실패:", revokeError);
+                    console.log("에러 코드:", revokeError.code);
+                    console.log("에러 메시지:", revokeError.message);
+
+                    // 사용자에게 수동 연결 해제 안내
+                    if (!window.confirm(
+                        "지갑 연결을 해제하시겠습니까?\n\n" +
+                        "자동 연결 해제가 지원되지 않습니다.\n" +
+                        "MetaMask에서 직접 연결을 해제하려면:\n" +
+                        "1. MetaMask 확장 프로그램 클릭\n" +
+                        "2. 연결된 사이트 관리\n" +
+                        "3. 이 사이트 연결 해제"
+                    )) {
+                        console.log("❌ 사용자가 연결 해제를 취소했습니다.");
+                        return; // 사용자가 취소한 경우
+                    }
+                }
+            } else {
+                console.warn("⚠️ MetaMask를 찾을 수 없습니다.");
             }
+
+            // 로컬 세션 데이터 정리
+            console.log("🧹 세션 데이터 정리 중...");
+            sessionStorage.clear();
+            localStorage.removeItem("walletAddress");
+
+            // Auth 페이지로 이동
+            console.log("🏠 Auth 페이지로 이동");
+            navigate("/auth");
         } catch (error) {
-            console.error("Disconnect error:", error);
+            console.error("❌ Disconnect error:", error);
+            // 오류 발생 시에도 세션 정리 후 이동
+            sessionStorage.clear();
+            localStorage.removeItem("walletAddress");
             navigate("/auth");
         }
     };
@@ -110,6 +147,16 @@ export default function MyNFTsPage() {
         if (tokenId <= 50) return { name: "에픽", color: "#a78bfa" };
         if (tokenId <= 200) return { name: "레어", color: "#60a5fa" };
         return { name: "커먼", color: "#94a3b8" };
+    };
+
+    // NFT 상세 보기 모달 열기
+    const openNFTDetail = (nft: any) => {
+        setSelectedNFT(nft);
+    };
+
+    // NFT 상세 보기 모달 닫기
+    const closeNFTDetail = () => {
+        setSelectedNFT(null);
     };
 
     if (loading) {
@@ -223,6 +270,26 @@ export default function MyNFTsPage() {
                                 const rarity = getRarity(nft.tokenId);
                                 return (
                                     <div key={nft.tokenId} className="nft-card">
+                                        {/* NFT 이미지 */}
+                                        {nft.imageUrl && (
+                                            <div
+                                                className="nft-image-container"
+                                                onClick={() => openNFTDetail(nft)}
+                                            >
+                                                <img
+                                                    src={nft.imageUrl}
+                                                    alt={`NFT #${nft.tokenId}`}
+                                                    className="nft-image"
+                                                    onError={(e) => {
+                                                        // 이미지 로드 실패 시 placeholder
+                                                        (e.target as HTMLImageElement).src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200"%3E%3Crect fill="%23ddd" width="200" height="200"/%3E%3Ctext fill="rgba(0,0,0,0.5)" font-family="sans-serif" font-size="20" dy="105" font-weight="bold" x="50%25" y="50%25" text-anchor="middle"%3ENFT%3C/text%3E%3C/svg%3E';
+                                                    }}
+                                                />
+                                                <div className="nft-image-overlay">
+                                                    <span className="nft-zoom-icon">🔍</span>
+                                                </div>
+                                            </div>
+                                        )}
                                         <div className="nft-card-header">
                                             <h3 className="nft-token-id">NFT #{nft.tokenId}</h3>
                                             <span className="nft-rarity" style={{ color: rarity.color }}>
@@ -256,6 +323,97 @@ export default function MyNFTsPage() {
                     </>
                 )}
             </div>
+
+            {/* NFT 상세 모달 */}
+            {selectedNFT && (
+                <div className="nft-modal-overlay" onClick={closeNFTDetail}>
+                    <div className="nft-modal-content" onClick={(e) => e.stopPropagation()}>
+                        <button className="nft-modal-close" onClick={closeNFTDetail}>
+                            ✕
+                        </button>
+
+                        <div className="nft-modal-grid">
+                            {/* 왼쪽: 이미지 */}
+                            <div className="nft-modal-image-section">
+                                <img
+                                    src={selectedNFT.imageUrl}
+                                    alt={`NFT #${selectedNFT.tokenId}`}
+                                    className="nft-modal-image"
+                                />
+                            </div>
+
+                            {/* 오른쪽: 상세 정보 */}
+                            <div className="nft-modal-details">
+                                <div className="nft-modal-header">
+                                    <h2 className="nft-modal-title">NFT #{selectedNFT.tokenId}</h2>
+                                    <span
+                                        className="nft-modal-rarity"
+                                        style={{ color: getRarity(selectedNFT.tokenId).color }}
+                                    >
+                                        {getRarity(selectedNFT.tokenId).name}
+                                    </span>
+                                </div>
+
+                                <div className="nft-modal-info-grid">
+                                    <div className="nft-modal-info-item">
+                                        <span className="nft-modal-label">🗳️ Ballot ID</span>
+                                        <span className="nft-modal-value">{selectedNFT.ballotId}</span>
+                                    </div>
+
+                                    <div className="nft-modal-info-item">
+                                        <span className="nft-modal-label">📊 투표한 후보</span>
+                                        <span className="nft-modal-value">#{selectedNFT.proposalId}</span>
+                                    </div>
+
+                                    <div className="nft-modal-info-item">
+                                        <span className="nft-modal-label">🎫 토큰 ID</span>
+                                        <span className="nft-modal-value">{selectedNFT.tokenId}</span>
+                                    </div>
+
+                                    <div className="nft-modal-info-item">
+                                        <span className="nft-modal-label">⏰ 발행 시간</span>
+                                        <span className="nft-modal-value">
+                                            {new Date().toLocaleString('ko-KR')}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div className="nft-modal-description">
+                                    <h3 className="nft-modal-section-title">📝 설명</h3>
+                                    <p className="nft-modal-description-text">
+                                        이 NFT는 {selectedNFT.ballotId} 투표에 참여한 증거로 발행되었습니다.
+                                        블록체인에 영구적으로 기록되며, 투표 참여를 인증합니다.
+                                    </p>
+                                </div>
+
+                                <div className="nft-modal-metadata">
+                                    <h3 className="nft-modal-section-title">🔗 메타데이터</h3>
+                                    <div className="nft-modal-metadata-item">
+                                        <span className="nft-modal-metadata-label">IPFS URL:</span>
+                                        <a
+                                            href={selectedNFT.imageUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="nft-modal-link"
+                                        >
+                                            {selectedNFT.imageUrl.substring(0, 50)}...
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <div className="nft-modal-actions">
+                                    <button className="nft-modal-btn nft-modal-btn-primary">
+                                        공유하기 📤
+                                    </button>
+                                    <button className="nft-modal-btn nft-modal-btn-secondary">
+                                        다운로드 💾
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

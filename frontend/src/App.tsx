@@ -2,7 +2,7 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import AuthPage from "./pages/AuthPage";
 import RegisterPage from "./pages/RegisterPage";
-import { VotingApp } from "./components/VotingApp";
+import { VotingApp } from "./pages/VotingApp";
 import MyNFTsPage from "./pages/MyNFTsPage";
 import "./App.css";
 

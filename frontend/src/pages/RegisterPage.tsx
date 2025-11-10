@@ -88,7 +88,7 @@ export default function RegisterPage() {
             await switchNetwork(
                 CHAIN_ID,
                 CHAIN_NAME,
-                process.env.REACT_APP_RPC_URL || "http://localhost:10545"
+                process.env.REACT_APP_RPC || "http://localhost:9545"
             );
 
             const address = accounts[0];
@@ -169,13 +169,34 @@ export default function RegisterPage() {
     return (
         <div className="register-page">
             <div className="register-container">
-                <h1>�� SBT 발급</h1>
+                <h1>🪪 SBT 발급</h1>
 
                 <div className="wallet-info">
-                    <p>
-                        <strong>연결된 지갑:</strong>
+                    <div className="wallet-info-header">
+                        <p>
+                            <strong>연결된 지갑:</strong>
+                        </p>
+                        <span
+                            className={`wallet-status ${walletAddress ? "connected" : "disconnected"}`}
+                        >
+                            {walletAddress ? "연결됨" : "연결 안 됨"}
+                        </span>
+                    </div>
+                    <p
+                        className={`wallet-address ${walletAddress ? "" : "placeholder"}`}
+                    >
+                        {walletAddress || "MetaMask에서 지갑을 연결해주세요."}
                     </p>
-                    <p className="wallet-address">{walletAddress}</p>
+
+                    {!walletAddress && (
+                        <button
+                            className="connect-wallet-button"
+                            onClick={handleConnectWallet}
+                            disabled={isConnecting}
+                        >
+                            {isConnecting ? "지갑 연결 중..." : "🔗 지갑 연결하기"}
+                        </button>
+                    )}
                 </div>
 
                 <div className="step-indicator">
@@ -219,7 +240,7 @@ export default function RegisterPage() {
                             <button
                                 className="mint-button"
                                 onClick={handleMintSBT}
-                                disabled={isMinting}
+                                disabled={isMinting || !walletAddress}
                             >
                                 🎫 SBT 발급받기
                             </button>

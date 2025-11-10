@@ -1,6 +1,6 @@
 import Web3 from "web3";
 
-const RPC_URL = process.env.REACT_APP_RPC_URL || "http://localhost:10545";
+const RPC_URL = process.env.REACT_APP_RPC || "http://localhost:9545";
 
 let web3Instance: Web3 | null = null;
 
@@ -121,9 +121,30 @@ export async function ensureWalletConnection(): Promise<void> {
 }
 
 export async function disconnectWallet(): Promise<void> {
-    // MetaMask doesn't have a programmatic disconnect
-    // Just clear the local state
-    web3Instance = null;
+    console.log("🔌 disconnectWallet 호출됨");
+
+    // 최신 MetaMask에서 지원하는 wallet_revokePermissions 시도
+    if ((window as any).ethereum) {
+        try {
+            console.log("📡 wallet_revokePermissions 시도...");
+            const result = await (window as any).ethereum.request({
+                method: 'wallet_revokePermissions',
+                params: [{ eth_accounts: {} }]
+            });
+            console.log("✓ 지갑 연결 권한이 성공적으로 취소되었습니다.", result);
+            web3Instance = null;
+        } catch (error: any) {
+            console.warn("⚠️ wallet_revokePermissions 실패:", error);
+            console.log("에러 코드:", error.code);
+            console.log("에러 메시지:", error.message);
+            // 실패해도 로컬 상태는 정리
+            web3Instance = null;
+            throw error; // 에러를 상위로 전달하여 폴백 처리 가능하도록
+        }
+    } else {
+        console.warn("⚠️ MetaMask를 찾을 수 없습니다.");
+        web3Instance = null;
+    }
 }
 
 export const CHAIN_ID = process.env.REACT_APP_CHAIN_ID || "0x539";

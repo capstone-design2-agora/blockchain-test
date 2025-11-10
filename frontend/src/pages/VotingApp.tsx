@@ -321,10 +321,21 @@ export function VotingApp() {
   }, [expectedChainLabel, loadCandidates]);
 
   const handleDisconnect = useCallback(async () => {
-    if (!hasBrowserWallet()) {
+    const clearAndRedirect = () => {
       setCurrentUser("익명 유권자");
       setUserHasVoted(false);
+      sessionStorage.clear();
+      localStorage.removeItem("walletAddress");
+      navigate("/auth");
+    };
+
+    if (!window.confirm("지갑 연결을 해제하시겠습니까?\n\nMetaMask에서 직접 연결을 해제하려면:\n1. MetaMask 확장 프로그램 클릭\n2. 연결된 사이트 관리\n3. 이 사이트 연결 해제")) {
+      return;
+    }
+
+    if (!hasBrowserWallet()) {
       setStatus("연결된 지갑이 없어 UI 상태만 초기화했어요.");
+      clearAndRedirect();
       return;
     }
 
@@ -335,10 +346,9 @@ export function VotingApp() {
       console.error(error);
       setStatus("지갑 연결 해제에 실패했어요. 지갑에서 직접 연결을 종료해 주세요.");
     } finally {
-      setCurrentUser("익명 유권자");
-      setUserHasVoted(false);
+      clearAndRedirect();
     }
-  }, []);
+  }, [navigate]);
 
   useEffect(() => {
     void loadBallotMetadata();
