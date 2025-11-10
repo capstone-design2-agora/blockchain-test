@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { connectWallet, switchNetwork, CHAIN_ID, CHAIN_NAME } from "../lib/web3";
+import { connectWallet, switchNetwork, CHAIN_ID, CHAIN_NAME, onAccountsChanged } from "../lib/web3";
 import { checkHasSBT } from "../lib/sbt";
 import "./AuthPage.css";
 
@@ -9,6 +9,18 @@ export default function AuthPage() {
     const [name, setName] = useState("");
     const [isConnecting, setIsConnecting] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        // 페이지 로드 시 지갑 연결 상태 감지
+        const unsubscribe = onAccountsChanged(async (accounts) => {
+            if (accounts.length === 0) {
+                // 지갑 연결 해제됨 - 현재 페이지 유지
+                console.log("Wallet disconnected on Auth page");
+            }
+        });
+
+        return () => unsubscribe();
+    }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();

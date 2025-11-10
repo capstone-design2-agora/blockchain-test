@@ -44,11 +44,25 @@ export default function VotingPage() {
 
         init();
 
-        const unsubscribe = onAccountsChanged((accounts) => {
+        const unsubscribe = onAccountsChanged(async (accounts) => {
             if (accounts.length === 0) {
+                // 지갑 연결 해제 시 Auth 페이지로 이동
                 navigate("/auth");
             } else {
-                setWalletAddress(accounts[0]);
+                // 지갑 변경 시 새 지갑의 SBT 확인
+                const newAddress = accounts[0];
+                setWalletAddress(newAddress);
+
+                try {
+                    const hasSBT = await checkHasSBT(newAddress);
+                    if (!hasSBT) {
+                        // 새 지갑에 SBT가 없으면 Auth 페이지로 이동
+                        navigate("/auth");
+                    }
+                } catch (error) {
+                    console.error("SBT check error on account change:", error);
+                    navigate("/auth");
+                }
             }
         });
 
@@ -71,7 +85,7 @@ export default function VotingPage() {
             setMessage(null);
 
             const result = await voteWithSBT(selectedProposal, walletAddress);
-            
+
             setMessage({
                 type: "success",
                 text: `투표가 완료되었습니다! NFT Token ID: ${result.rewardTokenId}`,
@@ -109,9 +123,8 @@ export default function VotingPage() {
                         {proposals.map((proposal) => (
                             <div
                                 key={proposal.id}
-                                className={`proposal-card ${
-                                    selectedProposal === proposal.id ? "selected" : ""
-                                }`}
+                                className={`proposal-card ${selectedProposal === proposal.id ? "selected" : ""
+                                    }`}
                                 onClick={() => !isVoting && setSelectedProposal(proposal.id)}
                             >
                                 <div className="proposal-number">{proposal.id + 1}</div>
