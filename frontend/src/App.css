@@ -1,13 +1,22 @@
 .App {
   min-height: 100vh;
   margin: 0;
-  padding: 5.5rem 0 7.5rem;
+  padding: 0;
   display: flex;
   justify-content: center;
+  align-items: flex-start;
   font-family: "SF Pro Display", "SF Pro Text", -apple-system, BlinkMacSystemFont,
     "Segoe UI", sans-serif;
   background: linear-gradient(180deg, #eef2ff 0%, #dbeafe 100%);
   color: #0f172a;
+}
+
+.voting-app-container {
+  width: 100%;
+  min-height: 100vh;
+  padding: 5.5rem 0 7.5rem;
+  display: flex;
+  justify-content: center;
 }
 
 .layout {

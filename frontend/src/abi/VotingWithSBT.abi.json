@@ -1,0 +1,616 @@
+[
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "citizenSBT_",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "rewardNFT_",
+        "type": "address"
+      },
+      {
+        "internalType": "string[]",
+        "name": "proposalNames",
+        "type": "string[]"
+      },
+      {
+        "internalType": "string",
+        "name": "ballotId",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "title_",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "description_",
+        "type": "string"
+      },
+      {
+        "internalType": "uint256",
+        "name": "opensAt",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "closesAt",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "announcesAt",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "expectedVoters",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "constructor",
+    "signature": "constructor"
+  },
+  {
+    "inputs": [],
+    "name": "AlreadyVoted",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidBallotId",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidSchedule",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "owner",
+        "type": "address"
+      }
+    ],
+    "name": "OwnableInvalidOwner",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      }
+    ],
+    "name": "OwnableUnauthorizedAccount",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ProposalDoesNotExist",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "VoterNotVerified",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "VotingClosed",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "VotingNotOpen",
+    "type": "error"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "title",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "description",
+        "type": "string"
+      }
+    ],
+    "name": "BallotDetailsUpdated",
+    "type": "event",
+    "signature": "0xffe3e46ef4df22f5166823f615515306475218d0267c66ee5a39ef6bc75a42f9"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "opensAt",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "closesAt",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "announcesAt",
+        "type": "uint256"
+      }
+    ],
+    "name": "BallotScheduleUpdated",
+    "type": "event",
+    "signature": "0x891e9ceac4c74ec36b3fbb5d5fd3e74e49a22c0afadce2b79d2b67453d150b81"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "expectedVoters",
+        "type": "uint256"
+      }
+    ],
+    "name": "ExpectedVotersUpdated",
+    "type": "event",
+    "signature": "0x0b2a436f723d4f2a770605572b64ddbfd1f81021eaf4d51f4a06b6e9b3a9e4a2"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "previousOwner",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "OwnershipTransferred",
+    "type": "event",
+    "signature": "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "proposalId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "name",
+        "type": "string"
+      }
+    ],
+    "name": "ProposalAdded",
+    "type": "event",
+    "signature": "0xf970aa486598017b8116c2beb18c50d4584ecbc3c688817f59b26796725f31bf"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "voter",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "proposalId",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "rewardTokenId",
+        "type": "uint256"
+      }
+    ],
+    "name": "VoteCast",
+    "type": "event",
+    "signature": "0xb4cfecf70861b7b150d8337780d34fb4cbc2114b5fb1fe51a5c5fca1849f7274"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "name",
+        "type": "string"
+      }
+    ],
+    "name": "addProposal",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "proposalId",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function",
+    "signature": "0x2fdae3c5"
+  },
+  {
+    "inputs": [],
+    "name": "ballotMetadata",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "string",
+            "name": "id",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "title",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "description",
+            "type": "string"
+          },
+          {
+            "internalType": "uint256",
+            "name": "opensAt",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "closesAt",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "announcesAt",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "expectedVoters",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct VotingWithSBT.BallotMetadata",
+        "name": "ballot",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function",
+    "constant": true,
+    "signature": "0x65dd60e8"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "voter",
+        "type": "address"
+      }
+    ],
+    "name": "canVote",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function",
+    "constant": true,
+    "signature": "0xadfaa72e"
+  },
+  {
+    "inputs": [],
+    "name": "citizenSBT",
+    "outputs": [
+      {
+        "internalType": "contract CitizenSBT",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function",
+    "constant": true,
+    "signature": "0xdd4e6de5"
+  },
+  {
+    "inputs": [],
+    "name": "getAllProposals",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "string",
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "internalType": "uint256",
+            "name": "voteCount",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct VotingWithSBT.Proposal[]",
+        "name": "proposals",
+        "type": "tuple[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function",
+    "constant": true,
+    "signature": "0xcceb68f5"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "proposalId",
+        "type": "uint256"
+      }
+    ],
+    "name": "getProposal",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "string",
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "internalType": "uint256",
+            "name": "voteCount",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct VotingWithSBT.Proposal",
+        "name": "proposal",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function",
+    "constant": true,
+    "signature": "0xc7f758a8"
+  },
+  {
+    "inputs": [],
+    "name": "getVotingStats",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "totalVotes",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "turnoutPercentage",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function",
+    "constant": true,
+    "signature": "0x76804a03"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "hasVoted",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function",
+    "constant": true,
+    "signature": "0x09eef43e"
+  },
+  {
+    "inputs": [],
+    "name": "owner",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function",
+    "constant": true,
+    "signature": "0x8da5cb5b"
+  },
+  {
+    "inputs": [],
+    "name": "proposalCount",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "count",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function",
+    "constant": true,
+    "signature": "0xda35c664"
+  },
+  {
+    "inputs": [],
+    "name": "renounceOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function",
+    "signature": "0x715018a6"
+  },
+  {
+    "inputs": [],
+    "name": "rewardNFT",
+    "outputs": [
+      {
+        "internalType": "contract VotingRewardNFT",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function",
+    "constant": true,
+    "signature": "0xc8ea4dd6"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "transferOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function",
+    "signature": "0xf2fde38b"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "title_",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "description_",
+        "type": "string"
+      }
+    ],
+    "name": "updateBallotDetails",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function",
+    "signature": "0x0c5232bf"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "opensAt",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "closesAt",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "announcesAt",
+        "type": "uint256"
+      }
+    ],
+    "name": "updateBallotSchedule",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function",
+    "signature": "0x7e5b05a9"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "expectedVoters",
+        "type": "uint256"
+      }
+    ],
+    "name": "updateExpectedVoters",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function",
+    "signature": "0xe50167bb"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "proposalId",
+        "type": "uint256"
+      }
+    ],
+    "name": "vote",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "rewardTokenId",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function",
+    "signature": "0x0121b93f"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "voterChoice",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function",
+    "constant": true,
+    "signature": "0xad84c2da"
+  }
+]
