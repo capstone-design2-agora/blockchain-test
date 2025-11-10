@@ -69,6 +69,24 @@ export default function VotingPage() {
         return () => unsubscribe();
     }, [navigate]);
 
+    const handleDisconnect = async () => {
+        try {
+            // MetaMask는 프로그래매틱하게 연결 해제할 수 없으므로
+            // Auth 페이지로 이동하고 사용자에게 안내
+            if (window.confirm("지갑 연결을 해제하시겠습니까?\n\nMetaMask에서 직접 연결을 해제하려면:\n1. MetaMask 확장 프로그램 클릭\n2. 연결된 사이트 관리\n3. 이 사이트 연결 해제")) {
+                // 세션 스토리지 정리
+                sessionStorage.clear();
+                localStorage.removeItem("walletAddress");
+
+                // Auth 페이지로 이동
+                navigate("/auth");
+            }
+        } catch (error) {
+            console.error("Disconnect error:", error);
+            navigate("/auth");
+        }
+    };
+
     const handleVote = async () => {
         if (selectedProposal === null) {
             setMessage({ type: "error", text: "후보를 선택해주세요." });
@@ -111,9 +129,25 @@ export default function VotingPage() {
                 <header className="voting-header">
                     <h1>🗳️ 근첩을 찾아라</h1>
                     <p className="description">누가 근첩이지?</p>
-                    <div className="wallet-badge">
-                        지갑: {walletAddress?.substring(0, 6)}...
-                        {walletAddress?.substring(walletAddress.length - 4)}
+                    <div className="wallet-info">
+                        <div className="wallet-badge">
+                            지갑: {walletAddress?.substring(0, 6)}...
+                            {walletAddress?.substring(walletAddress.length - 4)}
+                        </div>
+                        <button
+                            className="disconnect-button"
+                            onClick={handleDisconnect}
+                            disabled={isVoting}
+                        >
+                            🔌 연결 해제
+                        </button>
+                        <button
+                            className="nft-header-button"
+                            onClick={() => navigate("/my-nfts")}
+                            disabled={isVoting}
+                        >
+                            📦 내 NFT
+                        </button>
                     </div>
                 </header>
 

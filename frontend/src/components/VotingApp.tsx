@@ -577,6 +577,13 @@ export function VotingApp() {
               </div>
               <button
                 type="button"
+                className="wallet-button wallet-button--nft"
+                onClick={() => navigate("/my-nfts")}
+              >
+                📦 내 NFT 컬렉션 보기
+              </button>
+              <button
+                type="button"
                 className="wallet-button"
                 onClick={() => void connectWallet()}
               >

@@ -72,7 +72,7 @@ fi
 
 # RPC 연결 확인
 echo "🔗 RPC 연결 확인 중..."
-if ! curl -s -X POST http://localhost:10545 \
+if ! curl -s -X POST http://localhost:9545 \
     -H "Content-Type: application/json" \
     --data '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' \
     > /dev/null 2>&1; then

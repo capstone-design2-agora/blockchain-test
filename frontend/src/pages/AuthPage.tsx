@@ -1,26 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { connectWallet, switchNetwork, CHAIN_ID, CHAIN_NAME, onAccountsChanged } from "../lib/web3";
-import { checkHasSBT } from "../lib/sbt";
 import "./AuthPage.css";
 
 export default function AuthPage() {
     const navigate = useNavigate();
     const [name, setName] = useState("");
-    const [isConnecting, setIsConnecting] = useState(false);
+    const [isVerifying, setIsVerifying] = useState(false);
     const [error, setError] = useState<string | null>(null);
-
-    useEffect(() => {
-        // 페이지 로드 시 지갑 연결 상태 감지
-        const unsubscribe = onAccountsChanged(async (accounts) => {
-            if (accounts.length === 0) {
-                // 지갑 연결 해제됨 - 현재 페이지 유지
-                console.log("Wallet disconnected on Auth page");
-            }
-        });
-
-        return () => unsubscribe();
-    }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -36,38 +22,19 @@ export default function AuthPage() {
         }
 
         try {
-            setIsConnecting(true);
+            setIsVerifying(true);
             setError(null);
 
-            // Connect wallet
-            const accounts = await connectWallet();
-            if (accounts.length === 0) {
-                throw new Error("지갑 연결에 실패했습니다.");
-            }
+            // TODO: 여기에 나중에 실제 본인 확인 로직 추가
+            // 예: 휴대폰 인증, 신분증 인증 등
+            // 현재는 더미로 바로 넘김
 
-            // Switch to correct network
-            await switchNetwork(
-                CHAIN_ID,
-                CHAIN_NAME,
-                process.env.REACT_APP_RPC_URL || "http://localhost:10545"
-            );
-
-            const walletAddress = accounts[0];
-
-            // Check if already has SBT
-            const hasSBT = await checkHasSBT(walletAddress);
-
-            if (hasSBT) {
-                // Already has SBT, go directly to voting
-                navigate("/voting");
-            } else {
-                // Need to register and mint SBT
-                navigate("/register", { state: { name } });
-            }
+            // 본인 확인 성공 시 Register 페이지로 이동
+            navigate("/register", { state: { name } });
         } catch (error: any) {
-            console.error("Error during authentication:", error);
-            setError(error.message || "인증 중 오류가 발생했습니다.");
-            setIsConnecting(false);
+            console.error("Error during verification:", error);
+            setError(error.message || "본인 확인 중 오류가 발생했습니다.");
+            setIsVerifying(false);
         }
     };
 
@@ -86,7 +53,7 @@ export default function AuthPage() {
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                             placeholder="홍길동"
-                            disabled={isConnecting}
+                            disabled={isVerifying}
                             autoComplete="name"
                         />
                     </div>
@@ -100,16 +67,16 @@ export default function AuthPage() {
                     <button
                         type="submit"
                         className="connect-button"
-                        disabled={isConnecting || !name.trim()}
+                        disabled={isVerifying || !name.trim()}
                     >
-                        {isConnecting ? "연결 중..." : "🔗 지갑 연결하기"}
+                        {isVerifying ? "확인 중..." : "✅ 본인 확인"}
                     </button>
                 </form>
 
                 <div className="info-box">
                     <h3>ℹ️ 안내사항</h3>
                     <ul>
-                        <li>MetaMask 지갑이 필요합니다.</li>
+                        <li>본인 확인 후 지갑 연결이 필요합니다.</li>
                         <li>최초 1회 SBT(신원 토큰) 발급이 필요합니다.</li>
                         <li>SBT는 양도할 수 없으며 영구적으로 지갑에 바인딩됩니다.</li>
                         <li>1인 1투표가 보장됩니다.</li>

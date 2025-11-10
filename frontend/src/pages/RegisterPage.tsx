@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { getWeb3, onAccountsChanged } from "../lib/web3";
+import { connectWallet, switchNetwork, CHAIN_ID, CHAIN_NAME, getWeb3, onAccountsChanged } from "../lib/web3";
 import {
     checkHasSBT,
     checkIdentityRegistered,
@@ -17,10 +17,11 @@ export default function RegisterPage() {
     const name = (location.state as any)?.name;
 
     const [walletAddress, setWalletAddress] = useState<string | null>(null);
+    const [isConnecting, setIsConnecting] = useState(false);
     const [isMinting, setIsMinting] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
-    const [isChecking, setIsChecking] = useState(true);
+    const [isChecking, setIsChecking] = useState(false);
 
     const checkWallet = React.useCallback(async () => {
         try {
@@ -29,7 +30,8 @@ export default function RegisterPage() {
             const accounts = await web3.eth.getAccounts();
 
             if (accounts.length === 0) {
-                navigate("/auth");
+                setWalletAddress(null);
+                setIsChecking(false);
                 return;
             }
 
@@ -62,7 +64,7 @@ export default function RegisterPage() {
 
         const unsubscribe = onAccountsChanged((accounts) => {
             if (accounts.length === 0) {
-                navigate("/auth");
+                setWalletAddress(null);
             } else {
                 checkWallet();
             }
@@ -70,6 +72,43 @@ export default function RegisterPage() {
 
         return () => unsubscribe();
     }, [name, navigate, checkWallet]);
+
+    const handleConnectWallet = async () => {
+        try {
+            setIsConnecting(true);
+            setError(null);
+
+            // Connect wallet
+            const accounts = await connectWallet();
+            if (accounts.length === 0) {
+                throw new Error("지갑 연결에 실패했습니다.");
+            }
+
+            // Switch to correct network
+            await switchNetwork(
+                CHAIN_ID,
+                CHAIN_NAME,
+                process.env.REACT_APP_RPC_URL || "http://localhost:10545"
+            );
+
+            const address = accounts[0];
+            setWalletAddress(address);
+
+            // Check if already has SBT
+            const hasSBT = await checkHasSBT(address);
+            if (hasSBT) {
+                console.log(`✓ 이 지갑은 이미 SBT를 보유하고 있습니다: ${address}`);
+                setTimeout(() => navigate("/voting"), 1500);
+                return;
+            }
+
+            setIsConnecting(false);
+        } catch (error: any) {
+            console.error("Error connecting wallet:", error);
+            setError(error.message || "지갑 연결 중 오류가 발생했습니다.");
+            setIsConnecting(false);
+        }
+    };
 
     const handleMintSBT = async () => {
         if (!walletAddress || !name) {

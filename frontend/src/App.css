@@ -226,6 +226,18 @@
   box-shadow: 0 10px 22px rgba(148, 163, 184, 0.35);
 }
 
+.wallet-button--nft {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.35), rgba(168, 85, 247, 0.45));
+  border-color: rgba(168, 85, 247, 0.55);
+  color: #f0e7ff;
+  font-weight: 700;
+}
+
+.wallet-button--nft:hover {
+  box-shadow: 0 10px 22px rgba(168, 85, 247, 0.45);
+  transform: translateY(-2px);
+}
+
 .hero-card {
   position: relative;
   display: flex;

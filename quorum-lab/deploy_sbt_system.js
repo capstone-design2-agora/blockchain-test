@@ -152,8 +152,8 @@ async function deployContract(web3, deployer, name, abi, bytecode, args = []) {
 
 async function main() {
     // Load environment variables
-    const rpcUrl = process.env.NODE_URL || 'http://localhost:10545';
-    const consensus = process.env.GOQUORUM_CONS_ALGO || 'unknown';
+    const rpcUrl = process.env.NODE_URL || 'http://localhost:9545';
+    const consensus = process.env.GOQUORUM_CONS_ALGO || 'raft';
 
     // CitizenSBT parameters
     const sbtName = process.env.SBT_NAME || 'Citizen Identity Token';
